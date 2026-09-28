@@ -1,6 +1,6 @@
 # startbrain
 
-Official JavaScript client for the public API of [Brain Security](https://startbrain.io) (startbrain.io), the cybersecurity awareness company (security awareness training for CISOs and their employees, plus AI literacy).
+Official JavaScript client for the public API of [Brain Security](https://startbrain.io) (startbrain.io), a cybersecurity awareness company (security awareness training for CISOs and their employees, plus AI literacy).
 
 The API is public, read-only and needs no key. It returns the same data as the website: the product catalogue, use cases, public prices (EUR, excluding VAT) and languages. There is no write API.
 
@@ -13,7 +13,7 @@ The API is public, read-only and needs no key. It returns the same data as the w
 npm install startbrain
 ```
 
-Node 18 or later (built-in `fetch`), or any modern browser. No dependencies.
+Node 18 or later (built-in `fetch`), or any modern browser. ES module only (`import`, no `require`). No dependencies.
 
 ## Usage
 
@@ -36,9 +36,9 @@ const pricing = await brain.getPricing();
 | `listLanguages()` | `GET /api/v1/languages` |
 | `getOpenAPI()` | `GET /api/v1/openapi.json` |
 
-Languages: `fr`, `en-us`, `en-gb`, `de`, `es`, `it`, `nl`, `pt`.
+Languages: `fr`, `en-us`, `en-gb`, `de`, `es`, `it`, `nl`, `pt`. Pass `lang` explicitly: without it the API falls back on the `Accept-Language` header, then on `fr`.
 
-Errors are thrown as `StartbrainError`, with the HTTP `status` and the RFC 9457 `problem` document returned by the API.
+HTTP errors are thrown as `StartbrainError`, with the HTTP `status` and the RFC 9457 `problem` document returned by the API. Network errors are thrown as is by `fetch`.
 
 ## License
 

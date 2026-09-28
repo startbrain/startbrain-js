@@ -38,7 +38,7 @@ test('only reads: no method override, no credentials, no API key', async () => {
   await brain.getOpenAPI();
   for (const { init } of fetch.calls) {
     assert.equal(init.method, undefined);
-    assert.equal(init.credentials, undefined);
+    assert.equal(init.credentials, 'omit');   // no cookie of startbrain.io, even from a same-origin page
     assert.deepEqual(Object.keys(init.headers), ['accept']);
   }
   assert.deepEqual(fetch.calls.map(c => c.url.pathname), [
@@ -58,10 +58,16 @@ test('forwards filters, joins ids and drops empty params', async () => {
   assert.equal(sp.has('cursor'), false);
 });
 
-test('a product id cannot escape the products path', async () => {
+test('a product id cannot reach another endpoint', async () => {
+  // '..' would return the API index and '' the product list, typed as one product: reject before any call
   const fetch = fakeFetch();
-  await createClient({ fetch }).getProduct('../pricing', { lang: 'fr' });
-  assert.equal(fetch.calls[0].url.pathname, '/api/v1/products/..%2Fpricing');
+  const brain = createClient({ fetch });
+  for (const bad of ['..', '.', '', '../pricing', 'Cyber Cup', 'a'.repeat(65)]) {
+    await assert.rejects(brain.getProduct(bad), TypeError);
+  }
+  assert.equal(fetch.calls.length, 0);
+  await brain.getProduct('cyber-cup', { lang: 'fr' });
+  assert.equal(fetch.calls[0].url.pathname, '/api/v1/products/cyber-cup');
   assert.equal(fetch.calls[0].url.searchParams.get('lang'), 'fr');
 });
 
@@ -79,7 +85,13 @@ test('API errors become StartbrainError with the problem+json document', async (
 
 test('an error without a JSON body still reports the HTTP status', async () => {
   const brain = createClient({ fetch: fakeFetch(503, '<html>') });
-  await assert.rejects(brain.getPricing(), { name: 'StartbrainError', status: 503, message: 'HTTP 503' });
+  await assert.rejects(brain.getPricing(), { name: 'StartbrainError', status: 503, message: 'HTTP 503: not a JSON response' });
+});
+
+test('a 200 that is not JSON is an error, never a silent null', async () => {
+  // e.g. a wrong baseUrl pointing at an HTML page: the caller must not get null typed as data
+  const brain = createClient({ fetch: fakeFetch(200, '<html>') });
+  await assert.rejects(brain.getPricing(), { name: 'StartbrainError', status: 200 });
 });
 
 test('custom base URL, trailing slash tolerated', async () => {
@@ -91,8 +103,10 @@ test('custom base URL, trailing slash tolerated', async () => {
 test('package metadata ties the package to startbrain.io and the startbrain GitHub org', () => {
   // this is how agents (and orank) verify that the package is the official SDK and not a look-alike
   const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url)));
+  assert.equal(pkg.name, 'startbrain');
   assert.equal(new URL(pkg.homepage).hostname, 'startbrain.io');
-  assert.match(pkg.repository.url, /github\.com\/startbrain\//);
+  assert.equal(pkg.repository.url, 'git+https://github.com/startbrain/startbrain-js.git');
+  assert.equal(pkg.bugs.url, 'https://github.com/startbrain/startbrain-js/issues');
   assert.deepEqual(pkg.files, ['index.js', 'index.d.ts']);
   assert.deepEqual(pkg.dependencies, undefined);
 });

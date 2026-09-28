@@ -8,6 +8,7 @@ export interface Problem {
   status?: number;
   detail?: string;
   instance?: string;
+  code?: 'invalid_parameter' | 'not_found' | 'method_not_allowed' | 'rate_limited' | 'unavailable';
   [key: string]: unknown;
 }
 
@@ -56,7 +57,7 @@ export interface UseCase {
   title: string;
   description: string;
   products: string[];
-  links: Record<string, string>;
+  links: { products: string[] };
 }
 
 export interface Offer {
@@ -64,8 +65,9 @@ export interface Offer {
   name: string;
   price: number;
   priceCurrency: string;
-  unit?: string;
-  kind?: string;
+  unit: string;   // 'pack' | 'year' today
+  kind: string;   // 'credits' | 'kiosk_licence' today; new values may appear within v1
+  price_following_years?: number;
 }
 
 export interface Pricing {
