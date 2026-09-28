@@ -1,0 +1,44 @@
+{
+  "name": "startbrain",
+  "version": "0.1.0",
+  "description": "Official JavaScript client for the Brain Security public API (startbrain.io): cybersecurity awareness products, use cases and public prices. Read-only, no API key.",
+  "keywords": [
+    "brain-security",
+    "startbrain",
+    "security-awareness",
+    "cybersecurity",
+    "awareness-training",
+    "api-client",
+    "sdk"
+  ],
+  "homepage": "https://startbrain.io/developers/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/startbrain/startbrain-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/startbrain/startbrain-js/issues"
+  },
+  "author": "Brain Security SAS <contact@startbrain.io> (https://startbrain.io)",
+  "license": "MIT",
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}
